@@ -1,0 +1,8 @@
+key.json
+.env
+models/__pychache__/
+models/__pycache__/*
+__pychache__/
+__pycache__/*
+venv/
+venv/*
