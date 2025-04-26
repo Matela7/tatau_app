@@ -6,3 +6,9 @@ __pychache__/
 __pycache__/*
 venv/
 venv/*
+google_cloud/__pycache__/
+google_cloud/__pycache__/*
+routers/__pycache__/
+routers/__pycache__/*
+services/__pycache__/
+services/__pycache__/*
