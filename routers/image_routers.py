@@ -1,5 +1,5 @@
 from google_cloud.client import upload_cs_file, download_cs_file, delete_cs_file, BUCKET_NAME
-from services.image_service import add_image, delete_image, get_image, get_user_images
+from services.image_service import add_image, delete_image, get_image, get_user_images, get_feed_images
 from database import get_db_session
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
@@ -93,6 +93,39 @@ async def get_single_image(image_id: int, db: Session = Depends(get_db_session))
         }
         
         return JSONResponse(content={"status": "success", "image": image_data})
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    
+@router.get("/feed")
+async def get_feed(
+    limit: int = 20, 
+    offset: int = 0, 
+    search_term: str = None,
+    db: Session = Depends(get_db_session)
+):
+    """
+    Get images for the feed with optional search and pagination
+    """
+    try:
+        images = get_feed_images(db, limit, offset, search_term)
+        
+        # Convert images to a list of dictionaries with relevant information
+        image_list = [
+            {
+                "id": image.id,
+                "url": image.image_url,
+                "description": image.description,
+                "user_id": image.user_id
+            }
+            for image in images
+        ]
+        
+        return JSONResponse(content={
+            "status": "success", 
+            "images": image_list,
+            "count": len(image_list)
+        })
     
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

@@ -153,7 +153,8 @@ function setupEventListeners() {
             category.classList.add('active');
             
             const categoryType = category.getAttribute('data-category');
-            filterByCategory(categoryType);
+            const searchTerm = searchInput.value.trim();
+            filterByCategory(categoryType, searchTerm);
         });
     });
     
@@ -327,8 +328,8 @@ function loadForYouFeed() {
     feedContainer.innerHTML = '';
     loadingSpinner.style.display = 'flex';
     
-    // For demonstration, let's load all images or a selection of recent ones
-    fetch(`${API_BASE_URL}/image/images/1`) // Adjust this endpoint as needed
+    // Use the feed endpoint instead of hardcoding user_id=1
+    fetch(`${API_BASE_URL}/image/feed`)
         .then(response => response.json())
         .then(data => {
             loadingSpinner.style.display = 'none';
@@ -385,8 +386,15 @@ function createFeedItem(image) {
 }
 
 // Load explore page content
-function loadExploreContent() {
+function filterByCategory(category, searchTerm = '') {
     const exploreGrid = document.querySelector('.explore-grid');
+    
+    // Only search if there's a search term
+    if (!searchTerm) {
+        exploreGrid.innerHTML = '<div class="no-content-message">Enter a search term above</div>';
+        return;
+    }
+    
     exploreGrid.innerHTML = '<div class="loading-message">Loading explore content...</div>';
     
     // For demonstration, we'll load all images
@@ -647,80 +655,183 @@ function previewImage() {
 
 // Search functionality
 function handleSearch() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    if (!searchTerm) return;
+    const searchTerm = searchInput.value.trim();
     
     navigateToPage('explorePage');
     navItems.forEach(nav => nav.classList.remove('active'));
     document.querySelector('[data-page="explorePage"]').classList.add('active');
     
-    // Here you would typically call an API endpoint that supports searching
-    // Since we don't have a specific search endpoint, we'll filter client-side
-    // In a real app, you would implement server-side search
+    // Get active category
+    const activeCategory = document.querySelector('.category.active');
+    const categoryType = activeCategory.getAttribute('data-category');
     
+    // Always perform search, even with empty search term
+    filterByCategory(categoryType, searchTerm);
+}
+
+function filterByCategory(category, searchTerm = '') {
     const exploreGrid = document.querySelector('.explore-grid');
-    exploreGrid.innerHTML = '<div class="loading-message">Searching...</div>';
+    exploreGrid.innerHTML = '<div class="loading-message">Loading results...</div>';
     
-    fetch(`${API_BASE_URL}/image/images/1`) // Example endpoint
-        .then(response => response.json())
+    if (category === 'accounts') {
+        // Search for user accounts
+        searchAccounts(searchTerm);
+    } else {
+        // Search for tattoo ideas with the search term
+        searchTattooIdeas(searchTerm);
+    }
+}
+
+function searchAccounts(searchTerm) {
+    const exploreGrid = document.querySelector('.explore-grid');
+    exploreGrid.className = 'explore-grid'; // Reset to list view for accounts
+    
+    if (!searchTerm) {
+        exploreGrid.innerHTML = '<div class="no-content-message">Please enter a search term</div>';
+        return;
+    }
+    
+    // Call the real endpoint to search users
+    fetch(`${API_BASE_URL}/user/search?term=${encodeURIComponent(searchTerm)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             exploreGrid.innerHTML = '';
             
-            if (data.status === 'success' && data.images.length > 0) {
-                const filteredImages = data.images.filter(image => 
-                    (image.description && image.description.toLowerCase().includes(searchTerm))
-                );
-                
-                if (filteredImages.length > 0) {
-                    filteredImages.forEach(image => {
-                        const exploreItem = document.createElement('div');
-                        exploreItem.className = 'explore-item';
-                        exploreItem.innerHTML = `<img src="${image.url}" alt="${image.description || 'Tattoo'}" loading="lazy">`;
-                        exploreGrid.appendChild(exploreItem);
+            if (data.status === 'success' && data.users && data.users.length > 0) {
+                // Create a div for each user found
+                data.users.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.innerHTML = `
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-info">
+                            <h3>${user.username}</h3>
+                            <p>${user.user_type === 'artist' ? 'Tattoo Artist' : 
+                               user.user_type === 'studio' ? 'Tattoo Studio' : 'Client'}</p>
+                        </div>
+                    `;
+                    
+                    userItem.addEventListener('click', () => {
+                        // Show user profile or images
+                        navigateToUserProfile(user.id);
                     });
-                } else {
-                    exploreGrid.innerHTML = '<div class="no-content-message">No results found for your search.</div>';
-                }
+                    
+                    exploreGrid.appendChild(userItem);
+                });
             } else {
-                exploreGrid.innerHTML = '<div class="no-content-message">No images available for search.</div>';
+                exploreGrid.innerHTML = '<div class="no-content-message">No users found matching your search.</div>';
             }
         })
         .catch(error => {
-            console.error('Search error:', error);
-            exploreGrid.innerHTML = '<div class="error-message">Search failed. Please try again later.</div>';
+            console.error('Search accounts error:', error);
+            exploreGrid.innerHTML = '<div class="error-message">Error searching for accounts. Please try again.</div>';
         });
 }
 
-function filterByCategory(category) {
+function navigateToUserProfile(userId) {
+    // For now we'll just load their images
     const exploreGrid = document.querySelector('.explore-grid');
-    exploreGrid.innerHTML = '<div class="loading-message">Loading category: ' + category + '...</div>';
+    exploreGrid.innerHTML = '<div class="loading-message">Loading user content...</div>';
     
-    // In a real application, you would have an API endpoint to filter by category
-    // Here we're just simulating it with the existing endpoint
+    fetch(`${API_BASE_URL}/image/images/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.images.length > 0) {
+                // Switch to grid view for images
+                exploreGrid.className = 'explore-grid grid-view';
+                exploreGrid.innerHTML = '';
+                
+                data.images.forEach(image => {
+                    const exploreItem = document.createElement('div');
+                    exploreItem.className = 'explore-item';
+                    exploreItem.innerHTML = `<img src="${image.url}" alt="${image.description || 'Tattoo'}" loading="lazy">`;
+                    
+                    exploreItem.addEventListener('click', () => {
+                        showImageModal(image);
+                    });
+                    
+                    exploreGrid.appendChild(exploreItem);
+                });
+            } else {
+                exploreGrid.innerHTML = '<div class="no-content-message">This user has no images yet.</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading user content:', error);
+            exploreGrid.innerHTML = '<div class="error-message">Failed to load user content.</div>';
+        });
+}
+
+function searchTattooIdeas(searchTerm) {
+    const exploreGrid = document.querySelector('.explore-grid');
+    // Switch to grid view for tattoo images
+    exploreGrid.className = 'explore-grid grid-view';
     
-    fetch(`${API_BASE_URL}/image/images/1`) // Example endpoint
+    // Use the feed API with search term
+    fetch(`${API_BASE_URL}/image/feed?search_term=${encodeURIComponent(searchTerm)}`)
         .then(response => response.json())
         .then(data => {
             exploreGrid.innerHTML = '';
             
             if (data.status === 'success' && data.images.length > 0) {
-                // In a real app, you would filter by the actual category
-                const filteredImages = data.images;
-                
-                filteredImages.forEach(image => {
+                data.images.forEach(image => {
                     const exploreItem = document.createElement('div');
                     exploreItem.className = 'explore-item';
                     exploreItem.innerHTML = `<img src="${image.url}" alt="${image.description || 'Tattoo'}" loading="lazy">`;
+                    
+                    exploreItem.addEventListener('click', () => {
+                        showImageModal(image);
+                    });
+                    
                     exploreGrid.appendChild(exploreItem);
                 });
             } else {
-                exploreGrid.innerHTML = '<div class="no-content-message">No images found in this category.</div>';
+                exploreGrid.innerHTML = '<div class="no-content-message">No tattoo ideas found matching your search.</div>';
             }
         })
         .catch(error => {
-            console.error('Category filter error:', error);
-            exploreGrid.innerHTML = '<div class="error-message">Failed to load category. Please try again later.</div>';
+            console.error('Search tattoos error:', error);
+            exploreGrid.innerHTML = '<div class="error-message">Failed to search for tattoo ideas. Please try again later.</div>';
         });
+}
+
+// Show image in a modal
+function showImageModal(image) {
+    // Create a modal for the image
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="padding: 10px;">
+            <span class="close-modal">&times;</span>
+            <img src="${image.url}" alt="${image.description || 'Tattoo image'}" 
+                style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+            <p style="margin-top: 10px;">${image.description || 'No description available'}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close modal functionality
+    const closeBtn = modal.querySelector('.close-modal');
+    closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+    
+    // Close on click outside
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
 }
 
 // Utility functions
