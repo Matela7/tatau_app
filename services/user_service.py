@@ -70,3 +70,9 @@ def authenticate_user(session, username_or_email, password):
         return user
         
     return None
+
+def search_users_by_term(session, search_term):
+    return session.query(User).filter(
+        (User.username.ilike(f"%{search_term}%")) | 
+        (User.email.ilike(f"%{search_term}%"))
+    ).all()
