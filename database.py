@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, configure_mappers
 from contextlib import contextmanager
 from dotenv import load_dotenv
 from urllib.parse import urlparse
@@ -7,6 +7,7 @@ import os
 
 
 load_dotenv()
+configure_mappers()
 
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 

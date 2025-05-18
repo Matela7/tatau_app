@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from models import Base, User, Image, Tag, Interaction, image_tags
 from routers.image_routers import router as image_routers
 from routers.user_router import router as user_routers
+from routers.interactions_router import router as interaction_routers
+from sqlalchemy.orm import configure_mappers
 import uvicorn
+configure_mappers()
 
 app = FastAPI(
     title="Tatau App API",
@@ -21,6 +25,7 @@ app.add_middleware(
 
 app.include_router(image_routers)
 app.include_router(user_routers)
+app.include_router(interaction_routers)
 
 @app.get("/")
 async def root():

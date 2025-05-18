@@ -12,7 +12,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from models.base import Base
 from models.user import User
 from models.image import Image
-
+from models.interaction import Interaction
+from models.follow import follows
+from models.image_tag import image_tags
+from models.tag import Tag
 
 load_dotenv()
 
