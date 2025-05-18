@@ -382,6 +382,57 @@ function createFeedItem(image) {
         </div>
     `;
     
+    if (isAuthenticated && currentUser) {
+        // Rejestruj "view" tylko jeśli użytkownik jest zalogowany
+        fetch(`${API_BASE_URL}/interaction/record-interaction?image_id=${image.id}&user_id=${currentUser.id}&interaction_type=view`, {
+            method: 'POST'
+        }).catch(error => console.error('Error recording view:', error));
+    }
+    
+    // Dodaj obsługę kliknięć na przyciski akcji
+    const likeBtn = feedItem.querySelector('.feed-action:nth-child(1)');
+    const commentBtn = feedItem.querySelector('.feed-action:nth-child(2)');
+    const saveBtn = feedItem.querySelector('.feed-action:nth-child(3)');
+    
+    if (isAuthenticated && currentUser) {
+        likeBtn.addEventListener('click', () => {
+            // Wizualne potwierdzenie
+            likeBtn.querySelector('i').classList.toggle('far');
+            likeBtn.querySelector('i').classList.toggle('fas');
+            likeBtn.querySelector('i').style.color = likeBtn.querySelector('i').classList.contains('fas') ? 
+                'var(--primary-color)' : 'var(--text-secondary)';
+            
+            // Rejestruj interakcję
+            fetch(`${API_BASE_URL}/interaction/record-interaction?image_id=${image.id}&user_id=${currentUser.id}&interaction_type=like`, {
+                method: 'POST'
+            }).catch(error => console.error('Error recording like:', error));
+        });
+        
+        saveBtn.addEventListener('click', () => {
+            // Wizualne potwierdzenie
+            saveBtn.querySelector('i').classList.toggle('far');
+            saveBtn.querySelector('i').classList.toggle('fas');
+            saveBtn.querySelector('i').style.color = saveBtn.querySelector('i').classList.contains('fas') ? 
+                'var(--primary-color)' : 'var(--text-secondary)';
+                
+            // Rejestruj interakcję
+            fetch(`${API_BASE_URL}/interaction/record-interaction?image_id=${image.id}&user_id=${currentUser.id}&interaction_type=save`, {
+                method: 'POST'
+            }).catch(error => console.error('Error recording save:', error));
+        });
+        
+        commentBtn.addEventListener('click', () => {
+            // Tutaj możesz otworzyć modal do komentowania
+            // Rejestracja interakcji "comment" powinna nastąpić po faktycznym dodaniu komentarza
+            showCommentModal(image);
+        });
+    } else {
+        // Jeśli użytkownik nie jest zalogowany, pokaż powiadomienie
+        likeBtn.addEventListener('click', () => showNotification('Please login to like images'));
+        commentBtn.addEventListener('click', () => showNotification('Please login to comment'));
+        saveBtn.addEventListener('click', () => showNotification('Please login to save images'));
+    }
+    
     return feedItem;
 }
 
