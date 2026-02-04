@@ -155,6 +155,57 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal for image details (Instagram-style) -->
+        <div id="imageDetailModal" class="modal image-detail-modal">
+            <div class="image-detail-content">
+                <span class="close-modal">&times;</span>
+                <div class="image-detail-container">
+                    <div class="image-detail-left">
+                        <img id="detailImage" src="" alt="Image">
+                    </div>
+                    <div class="image-detail-right">
+                        <div class="detail-header">
+                            <div class="detail-user-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="detail-user-info">
+                                <div class="detail-username"></div>
+                                <div class="detail-user-type"></div>
+                            </div>
+                            <button id="detailFollowBtn" class="action-button" style="display:none; margin-right:8px;">Follow</button>
+                            <button id="deleteImageBtn" class="delete-btn" style="display: none;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button id="detailCloseBtn" class="action-button" style="margin-left:8px;">Close</button>
+                        </div>
+                        <div class="detail-description"></div>
+                        <div class="detail-actions">
+                            <div class="detail-action detail-like-action">
+                                <i class="far fa-heart"></i>
+                                <span class="detail-like-count">0</span>
+                            </div>
+                            <div class="detail-action detail-comment-action">
+                                <i class="far fa-comment"></i>
+                                <span class="detail-comment-count">0</span>
+                            </div>
+                            <div class="detail-action detail-save-action">
+                                <i class="far fa-bookmark"></i>
+                                <span class="detail-save-count">0</span>
+                            </div>
+                        </div>
+                        <div class="detail-comments">
+                            <h4>Comments</h4>
+                            <div class="comment-list"></div>
+                            <div class="comment-form">
+                                <textarea id="commentInput" rows="2" placeholder="Add a comment..."></textarea>
+                                <button id="commentSubmitBtn" class="action-button">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

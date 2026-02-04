@@ -32,7 +32,7 @@ def get_recommendations(session: Session, user_id: int, limit: int = 20):
     followed_users_images = session.query(Image)\
         .join(User, User.id == Image.user_id)\
         .filter(User.id.in_([followed.id for followed in user.following]))\
-        .order_by(desc(Image.created_at))\
+        .order_by(desc(Image.id))\
         .limit(limit * 2)\
         .all()
 
@@ -84,16 +84,15 @@ def get_recommendations(session: Session, user_id: int, limit: int = 20):
         image_scores[img.id] = image_scores.get(img.id, 0) + popularity_score
     
     # 4. Najnowsze obrazy (priorytet dla świeżości)
+    # Brak created_at w modelu Image — jako proxy świeżości używamy malejącego ID
     recent_images = session.query(Image)\
-        .filter(Image.created_at > one_week_ago)\
-        .order_by(desc(Image.created_at))\
+        .order_by(desc(Image.id))\
         .limit(limit)\
         .all()
 
-    # Przypisz wagi na podstawie świeżości
-    for img in recent_images:
-        days_old = (now - img.created_at).days
-        recency_score = 2.0 * (7 - min(days_old, 7)) / 7  # 2.0 to 0.0 w ciągu 7 dni
+    # Waga za świeżość bazująca na pozycji (ID jako przybliżenie kolejności dodania)
+    for rank, img in enumerate(recent_images):
+        recency_score = max(0.0, 2.0 - rank * 0.1)
         image_scores[img.id] = image_scores.get(img.id, 0) + recency_score
     
     # Sortuj obrazy według ich końcowych wag i pobierz pełne obiekty
@@ -132,10 +131,9 @@ def get_popular_recent_images(session: Session, limit: int, excluded_ids=None):
     
     popular_recent = session.query(Image, func.count(Interaction.id).label('interaction_count'))\
         .outerjoin(Interaction)\
-        .filter(Image.created_at > one_month_ago)\
         .filter(Image.id.notin_(excluded_ids))\
         .group_by(Image.id)\
-        .order_by(desc('interaction_count'), desc(Image.created_at))\
+        .order_by(desc('interaction_count'), desc(Image.id))\
         .limit(limit)\
         .all()
     

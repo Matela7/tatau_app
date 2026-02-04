@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 import os
 
 
+from models import Base  # ensure all models are registered, incl. comments
+
 load_dotenv()
 configure_mappers()
 
@@ -15,6 +17,9 @@ engine = create_engine(
     f"postgresql+psycopg2://{tmpPostgres.username}:{tmpPostgres.password}@{tmpPostgres.hostname}{tmpPostgres.path}?sslmode=require",
     echo=True
 )
+
+# Ensure tables exist (no-op if already present)
+Base.metadata.create_all(engine)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

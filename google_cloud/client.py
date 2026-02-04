@@ -4,9 +4,10 @@ import os
 from google.cloud import storage
 import shutil
 import uuid
+import pathlib
 
 # set key credentials file path
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r'C:\Users\miche\Desktop\tatau_app\key.json'
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/matela/zpo/tatau_app/google.json"
 BUCKET_NAME = 'tatau_app'
 
 def upload_cs_file(bucket_name, source_file_name, destination_file_name): 

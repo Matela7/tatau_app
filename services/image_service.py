@@ -1,5 +1,7 @@
 from models.image import Image
 from models.tag import Tag
+from models.interaction import Interaction
+from models.comment import Comment
 from sqlalchemy import desc, or_
 
 def add_image(session, user_id, image_url, description=None, tags=None):
@@ -57,11 +59,19 @@ def update_image(session, image_id, image_url=None, description=None, tags=None)
 
 def delete_image(session, image_id):
     image = session.query(Image).filter_by(id=image_id).first()
-    if image:
-        session.delete(image)
-        session.commit()
-        return True
-    return False
+    if not image:
+        return False
+
+    # Remove dependent records to satisfy FK constraints
+    session.query(Interaction).filter_by(image_id=image_id).delete(synchronize_session=False)
+    session.query(Comment).filter_by(image_id=image_id).delete(synchronize_session=False)
+
+    # Clear many-to-many tags
+    image.tags = []
+
+    session.delete(image)
+    session.commit()
+    return True
 
 def get_image(session, image_id):
     return session.query(Image).filter_by(id=image_id).first()

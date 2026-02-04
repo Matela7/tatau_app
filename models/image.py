@@ -15,3 +15,4 @@ class Image(Base):
     
     tags = relationship("Tag", secondary=image_tags, back_populates="images")
     interactions = relationship("Interaction", back_populates="image")
+    comments = relationship("Comment", back_populates="image")

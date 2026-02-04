@@ -4,12 +4,13 @@ from models import Base, User, Image, Tag, Interaction, image_tags
 from routers.image_routers import router as image_routers
 from routers.user_router import router as user_routers
 from routers.interactions_router import router as interaction_routers
+from routers.comment_router import router as comment_routers
 from sqlalchemy.orm import configure_mappers
 import uvicorn
 configure_mappers()
 
 app = FastAPI(
-    title="Tatau App API",
+    title="Tatau     App API",
     description="API for Tatau Application",
     version="1.0.0"
 )
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(image_routers)
 app.include_router(user_routers)
 app.include_router(interaction_routers)
+app.include_router(comment_routers)
 
 @app.get("/")
 async def root():
@@ -36,4 +38,4 @@ async def root():
     }
     
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

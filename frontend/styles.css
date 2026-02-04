@@ -140,6 +140,11 @@ main {
 }
 
 .feed-item-username {
+        transition: color 0.2s;
+    }
+
+    .feed-item-username:hover {
+        color: var(--primary-color);
     font-weight: bold;
     font-size: 14px;
 }
@@ -311,6 +316,43 @@ main {
     margin: 0;
     color: var(--text-secondary);
     font-size: 13px;
+}
+
+/* User Profile Header in Explore */
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    background-color: var(--light-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.user-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.user-profile-info h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: var(--text-color);
+}
+
+.user-profile-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 
 /* Profile Page Styles */
@@ -547,6 +589,180 @@ nav {
     margin-top: 10px;
     max-height: 200px;
     overflow: hidden;
+}
+
+/* Image Detail Modal (Instagram-style) */
+.image-detail-modal .modal-content {
+    max-width: 1200px;
+    width: 95%;
+    max-height: 90vh;
+    padding: 0;
+    background-color: transparent;
+}
+
+.image-detail-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.image-detail-content .close-modal {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+}
+
+.image-detail-container {
+    display: flex;
+    background-color: var(--darker-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 90vh;
+}
+
+.image-detail-left {
+    flex: 1;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.image-detail-left img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.image-detail-right {
+    width: 400px;
+    background-color: var(--light-bg);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 10px;
+}
+
+.detail-user-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--dark-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-user-icon i {
+    font-size: 20px;
+    color: var(--primary-color);
+}
+
+.detail-user-info {
+    flex: 1;
+}
+
+.detail-username {
+        transition: color 0.2s;
+    }
+
+    .detail-username:hover {
+        color: var(--primary-color);
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.detail-user-type {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.detail-description {
+    padding: 15px;
+    color: var(--text-color);
+    flex: 1;
+    overflow-y: auto;
+}
+
+.detail-actions {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.detail-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.detail-action i {
+    font-size: 24px;
+}
+
+.detail-action span {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.detail-action:hover {
+    color: var(--primary-color);
+}
+
+/* Mobile responsive for detail modal */
+@media (max-width: 768px) {
+    .image-detail-container {
+        flex-direction: column;
+    }
+    
+    .image-detail-left {
+        max-height: 60vh;
+    }
+    
+    .image-detail-right {
+        width: 100%;
+        max-height: 40vh;
+    }
+    
+    .image-detail-modal .modal-content {
+        width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+    
+    .image-detail-content .close-modal {
+        top: 10px;
+        right: 10px;
+    }
 }
 
 /* Notification */

@@ -12,3 +12,6 @@ routers/__pycache__/
 routers/__pycache__/*
 services/__pycache__/
 services/__pycache__/*
+venv2/
+venv2/*
+*.json

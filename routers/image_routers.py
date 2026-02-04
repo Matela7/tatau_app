@@ -1,5 +1,7 @@
+import logging
 from google_cloud.client import upload_cs_file, download_cs_file, delete_cs_file, BUCKET_NAME
 from services.image_service import add_image, delete_image, get_image, get_user_images, get_feed_images
+from services.recommendation_service import get_recommendations
 from database import get_db_session
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
@@ -9,6 +11,8 @@ import os
 from google.cloud import storage
 import shutil
 import uuid
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/image", tags=["image"])
 
@@ -31,19 +35,19 @@ async def upload_file(file: UploadFile = File(...), user_id: int = 1, descriptio
         return JSONResponse(content={"status": "success", "public_url": public_url})
 
     except Exception as e:
+        logger.exception("Feed endpoint failed")
         return JSONResponse(status_code=500, content={"error": str(e)})
     
 @router.delete("/delete/{image_id}")
-
 async def delete_file(image_id: int, db: Session = Depends(get_db_session)):
     image = get_image(db, image_id)
     if not image:
         return JSONResponse(status_code=404, content={"error": "Image not found"})
     else:   
         try:
-            # Delete from GCS
-            delete_cs_file(BUCKET_NAME, image.image_url.split("/")[-1])
-            # Delete from DB
+        # Delete from GCS
+        # delete_cs_file(BUCKET_NAME, image.image_url.split("/")[-1])
+        # Delete from DB
             delete_image(db, image_id)       
             return JSONResponse(content={"status": "success", "message": "Image deleted successfully"})
         except Exception as e:
@@ -99,33 +103,36 @@ async def get_single_image(image_id: int, db: Session = Depends(get_db_session))
     
 @router.get("/feed")
 async def get_feed(
-    limit: int = 20, 
-    offset: int = 0, 
-    search_term: str = None,
+    limit: int = 20,
+    offset: int = 0,
+    user_id: int | None = None,
+    search_term: str | None = None,
     db: Session = Depends(get_db_session)
 ):
-    """
-    Get images for the feed with optional search and pagination
-    """
-    try:
+    """Get images for the feed with optional search, pagination, and personalization."""
+    # try:
+    if search_term:
         images = get_feed_images(db, limit, offset, search_term)
-        
-        # Convert images to a list of dictionaries with relevant information
-        image_list = [
-            {
-                "id": image.id,
-                "url": image.image_url,
-                "description": image.description,
-                "user_id": image.user_id
-            }
-            for image in images
-        ]
-        
-        return JSONResponse(content={
-            "status": "success", 
-            "images": image_list,
-            "count": len(image_list)
-        })
-    
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    else:
+        images = get_recommendations(db, user_id, limit)
+
+    image_list = [
+        {
+            "id": image.id,
+            "url": image.image_url,
+            "description": image.description,
+            "user_id": image.user_id,
+            "username": getattr(image.owner, "username", f"User {image.user_id}"),
+            "user_type": getattr(image.owner, "user_type", "artist"),
+        }
+        for image in images
+    ]
+
+    return JSONResponse(content={
+        "status": "success",
+        "images": image_list,
+        "count": len(image_list)
+    })
+
+    # except Exception as e:
+    #     return JSONResponse(status_code=500, content={"error": str(e)})

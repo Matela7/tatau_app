@@ -13,6 +13,7 @@ class User(Base):
 
     images = relationship("Image", back_populates="owner")
     interactions = relationship("Interaction", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
 
     following = relationship(
         "User",

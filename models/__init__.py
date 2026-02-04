@@ -4,3 +4,4 @@ from models.user import User
 from models.tag import Tag
 from models.image import Image
 from models.interaction import Interaction
+from models.comment import Comment

@@ -76,3 +76,30 @@ def search_users_by_term(session, search_term):
         (User.username.ilike(f"%{search_term}%")) | 
         (User.email.ilike(f"%{search_term}%"))
     ).all()
+
+def add_follow(session, follower_id, followed_id):
+    follower = get_user(session, follower_id)
+    followed = get_user(session, followed_id)
+    if follower and followed:
+        if followed not in follower.following:
+            follower.following.append(followed)
+            session.commit()
+        return True
+    return False
+
+def remove_follow(session, follower_id, followed_id):
+    follower = get_user(session, follower_id)
+    followed = get_user(session, followed_id)
+    if follower and followed:
+        if followed in follower.following:
+            follower.following.remove(followed)
+            session.commit()
+        return True
+    return False
+
+def is_following(session, follower_id, followed_id):
+    follower = get_user(session, follower_id)
+    followed = get_user(session, followed_id)
+    if not follower or not followed:
+        return False
+    return followed in follower.following

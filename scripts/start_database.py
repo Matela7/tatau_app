@@ -16,6 +16,7 @@ from models.interaction import Interaction
 from models.follow import follows
 from models.image_tag import image_tags
 from models.tag import Tag
+from models.comment import Comment
 
 load_dotenv()
 
